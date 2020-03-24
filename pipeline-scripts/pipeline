@@ -1,13 +1,13 @@
 def mvnHome
 def remote = [:]
          remote.name = 'ansible'
-         remote.host = '172.31.36.190'
+         remote.host = '172.31.88.69'
          remote.user = 'centos'
          remote.password = 'Rnstech@123'
          remote.allowAnyHosts = true
 def remote1 = [:]
     	remote1.name = 'kops'
-    	remote1.host = '172.31.36.46'
+    	remote1.host = '172.31.88.206'
     	remote1.user = 'centos'
     	remote1.password = 'Rnstech@123'
     	remote1.allowAnyHosts = true
@@ -18,21 +18,21 @@ pipeline {
    stages {
       stage('Prepare Workspace') {
          agent {
-              label 'Slave'
+              label 'slave'
           }
          steps {
             // Get src code from a GitHub repository
             git credentialsId: 'Github_un_pwd', url: 'https://github.com/venkat09docs/Maven-Java-Project.git'
             stash 'Source'
             script{
-                mvnHome = tool name: 'maven3', type: 'maven'
+                mvnHome = tool name: 'maven3.6', type: 'maven'
             }      
       }   
       }
       
       stage('Setup Tools'){
          agent {
-              label 'Slave'
+              label 'slave'
           }
           steps{
           
@@ -48,7 +48,7 @@ pipeline {
       }      
       stage('SonarQube analysis') {
          agent {
-              label 'Slave'
+              label 'slave'
           }
           steps{
                 echo "Sonar Scanner"
@@ -61,7 +61,7 @@ pipeline {
       
       stage('Unit Test Cases') {
          agent {
-              label 'Slave'
+              label 'slave'
           }
           steps{
               sh "${mvnHome}/bin/mvn clean test"  
@@ -75,7 +75,7 @@ pipeline {
       
        stage('Build Code') {
          agent {
-              label 'Slave'
+              label 'slave'
           }
           steps{
 	      unstash 'Source'
@@ -90,7 +90,7 @@ pipeline {
       
     stage('Build Docker Image') {
          agent {
-                  label 'Slave'
+                  label 'slave'
          }
          steps{
                   sh "docker build -t gvenkat/batch21webapp ."  
@@ -99,7 +99,7 @@ pipeline {
      
      stage('Publish Docker Image') {
          agent {
-                  label 'Slave'
+                  label 'slave'
          }
     steps{
 
@@ -112,7 +112,7 @@ pipeline {
 
     stage('Deploy to Staging') {
 	agent {
-	      label 'Slave'
+	      label 'slave'
 	}
 	steps{
 	      //Deploy to K8s Cluster 
@@ -124,7 +124,7 @@ pipeline {
 
     stage ('Integration-Test') {
 	agent {
-		label "Slave"
+		label "slave"
         }
 	steps {
              echo "Run Integration Test Cases"
@@ -135,7 +135,7 @@ pipeline {
 
     stage ('approve') {
 	agent {
-        	label "Slave"
+        	label "slave"
         }
 	steps {
 		echo "Approval State"
@@ -147,7 +147,7 @@ pipeline {
 
     stage ('Prod-Deploy') {
 	agent {
-		label "Slave"
+		label "slave"
         }
 	steps{
               echo "Deploy to Production"
